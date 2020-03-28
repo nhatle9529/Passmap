@@ -1,0 +1,97 @@
+import json
+import pandas as pd
+from pandas.io.json import json_normalize
+import matplotlib.pyplot as plt
+import matplotlib.patches as pat
+import seaborn as sns
+
+data = json.load(open('C:\\Users\\16036\\Downloads\\25_TOT_MCI_data.json'))
+df = pd.DataFrame(data['events'])
+
+data1 = json.load(open('C:\\Users\\16036\\Downloads\\25_TOT_MCI_player_stats.json'))
+c = data1['team'][0]['players']
+df1 = pd.DataFrame(c)
+
+
+passplayer = []
+startingplayer = []
+for i in range(len(df1)):
+    if df1.iloc[i].starter == True:
+        #print(i)
+        player_id = df1.iloc[i].id
+        startingplayer.append(player_id)
+
+       
+        
+for i in range(len(b)):
+    for p in startingplayer:
+        if (b.iloc[i].type_id ==1)&(b.iloc[i].outcome==1)&(i<172)&(b.iloc[i].player_id == p):
+            player = [b.iloc[i].player_id,b.iloc[i+1].player_id]
+            passplayer.append(player)
+#passplayer: Tổng hợp tất cả các đường chuyền bao gồm vị trí đầu là cầu thủ chuyền, vị trí hai là cầu thủ nhận đường chuyền
+#startingplayer: Tổng hợp tất cả các cầu thủ đội hình xuất phát
+
+finallist = [list(x) for x in set([tuple(x) for x in passplayer])]
+#finallist: Lọc ra không bị trùng số đường chuyền giữa 2 cầu thủ với nhau.
+#passplayer
+#startingplayer
+for i in range(len(finallist)):
+    print([finallist[i], passplayer.count(finallist[i])]) #thống kê 1 cầu thủ A chuyền cho cầu thủ B bao nhiêu lần.
+
+
+
+for i in range(len(startingplayer)):
+    player = df.iloc[:][(df.player_id == startingplayer[i])] #Làm vòng lặp cho chạy các giá trị cầu thủ i mà nó chỉ chạy ra 1 kết quả nó ko lặp lại.
+
+def draw_pitch(ax):
+    Pitch = plt.Rectangle([0,0], width = 80, height = 120, fill = False)
+  
+    TopPenalty = plt.Rectangle([22.3,0], width = 35.3, height = 14.6, fill = False)
+    BottomPenalty = plt.Rectangle([22.3,105.4], width = 35.3, height = 14.6, fill = False)
+    midline = pat.ConnectionPatch([0,60], [80,60], "data", "data")
+
+    
+    TopSixYard = plt.Rectangle([32,0], width = 16, height = 4.9, fill = False)
+    BottomSixYard = plt.Rectangle([32,115.1], width = 16, height = 4.9, fill = False)
+
+
+
+    centreCircle = plt.Circle((40,60),8.1,color="black", fill = False)
+    centreSpot = plt.Circle((40,60),0.71,color="black")
+    
+    leftPenSpot = plt.Circle((40,9.7),0.71,color="black")
+    rightPenSpot = plt.Circle((40,110.3),0.71,color="black")
+    BottomArc = pat.Arc((40,9.5),height=16.2,width=16.2,angle=450,theta1=310,theta2=50,color="black")
+    TopArc = pat.Arc((40,110.3),height=16.2,width=16.2,angle=450,theta1=130,theta2=230,color="black")
+ 
+
+    element = [Pitch, BottomPenalty, TopPenalty, midline, BottomSixYard, TopSixYard, centreCircle, centreSpot, 
+               leftPenSpot, rightPenSpot, BottomArc, TopArc]
+    
+    for i in element:
+        ax.add_patch(i)
+
+
+    
+fig = plt.figure()
+fig.set_size_inches(8, 12)
+ax = fig.add_subplot(1, 1, 1)
+
+allpasses = player.iloc[:][(player.type_id==1)&(player.outcome == 1)].x.count()
+x1 = 0
+y1 = 0
+for i in range(len(player)):
+    if (player.iloc[i].type_id == 1)&(player.iloc[i].outcome ==1):
+        x1 += player.iloc[i].x*1.2
+        y1 += (80 - player.iloc[i].y*0.8)
+avgx = y1/allpasses
+avgy = x1/allpasses
+       
+plt.scatter(avgx,avgy,color="red", edgecolors="red", zorder=12, alpha=1) #Vẽ vị trí trung bình
+                
+draw_pitch(ax)
+plt.ylim(-2, 122)
+plt.xlim(-2, 82)
+plt.axis('off')
+plt.show()
+    
