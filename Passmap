@@ -21,7 +21,7 @@ for i in range(len(df1)):
         player_id = df1.iloc[i].id
         startingplayer.append(player_id)
 
-       
+ b = df.iloc[:][(df.player_id>0)&(df.team_id == 6)]      
         
 for i in range(len(b)):
     for p in startingplayer:
